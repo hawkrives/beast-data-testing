@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<beast beautistatus="" beautitemplate="Standard" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" required="" version="2.4">
+<?xml version='1.0' encoding='utf-8'?>
+<beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" required="" version="2.4">
+
 
 <data id="alignment" name="alignment">
     <sequence id="seq_Claudius_angustatus__KF301358" taxon="Claudius_angustatus__KF301358" totalcount="4" value="acagttcattcattgacctaccaagcccctcaaacatttcagcctgatgaaattttggatcacttattggcatttgcttaatcctacaaattactaccggtatcttcttagccatacactactcatctgatatatccttagcattctcaacagtagcccacatcacccgagacgtacaatacggttgactcatccgcaacatacatgccaacggtgcctcaatattcttcatctgcatctacatacacatcggacgaggtgtttactacggttcatacctctacaaagaaacttgaaacacaggaattttcttactgctactaactataataactgcattcataggatacgtcctaccatgaggccaaatatcattctgaggcgccaccgtaatcaccaatctgctctcagccatcccttacatcggtacttcacttgtacaatgaatttgagggggtttctcagtagataacccaaccctaactcgattcttcacactacatttccttctcccttttataatcgcaggcctagcaataacacatctcctcttcctacacgaaaccggctcaaacaacccaacaggactaaattcaaacaccgacaaaatcccattccacccatacttttcatataaagacttactaggcattatcctattacttaccaccctactaacactaacactgttctccccctacctattaggagacccagacaatttcactccagctaaccctttaaccacccctccacacatcaaaccagaatgatacttccttttcgcctacgcaattctacgatcaatcccaaacaaattaggaggcgtacttgccctactagcttccatcctcatcctcttcttactaccaataacacacacatccaaacaacgaacagctatattccgaccattaacccaaatcctattctgaatcctgacagccaacctactaatcctaacatgaatcggaggacaaccagttgaaaatccattcatcctaattggacaaacggcctctattaactacttcataaccctactaatcctcctgccaacagcaggcctaattgaaaataaaata--" />
@@ -49,7 +50,8 @@
 <map name="InverseGamma">beast.math.distributions.InverseGamma</map>
 <map name="OneOnX">beast.math.distributions.OneOnX</map>
 
-<run chainLength="20000000" id="mcmc" spec="MCMC">
+
+<run chainLength="100000" id="mcmc" spec="MCMC">
     <state id="state" storeEvery="5000">
         <tree id="Tree.t:alignment" name="stateNode">
             <trait id="dateTrait.t:alignment" spec="beast.evolution.tree.TraitSet" traitname="date-backward">Sternotherus_carinatus__JN860673=0.000000,
@@ -87,18 +89,20 @@ Staurotypus_triporcatus__KF301360=0.000000,
 Staurotypus_salvinii__KF301359=0.000000,
 Claudius_angustatus__KF301358=0.000000
 <taxa id="TaxonSet.alignment" spec="TaxonSet">
-                    <alignment idref="alignment" />
+                <alignment idref="alignment" />
               </taxa>
             </trait>
             <taxonset idref="TaxonSet.alignment" />
         </tree>
-        <parameter id="clockRate.c:alignment" lower="1.0E-9" name="stateNode" upper="0.001">1.0E-4</parameter>
         <parameter id="rateAG.s:alignment" lower="0.0" name="stateNode">1.0</parameter>
         <parameter id="rateCG.s:alignment" lower="0.0" name="stateNode">1.0</parameter>
         <parameter id="rateGT.s:alignment" lower="0.0" name="stateNode">1.0</parameter>
         <parameter id="popSize.t:alignment" lower="-1.0E100" name="stateNode" upper="1.0E100">0.3</parameter>
         <parameter id="proportionInvariant.s:alignment" lower="0.0" name="stateNode" upper="1.0">0.3</parameter>
         <parameter id="gammaShape.s:alignment" name="stateNode">1.0</parameter>
+        <parameter id="ucldMean.c:alignment" name="stateNode">1.0</parameter>
+        <parameter id="ucldStdev.c:alignment" lower="0.0" name="stateNode">0.1</parameter>
+        <stateNode dimension="4" id="rateCategories.c:alignment" spec="parameter.IntegerParameter">1</stateNode>
         <parameter dimension="4" id="freqParameter.s:alignment" lower="0.0" name="stateNode" upper="1.0">0.25</parameter>
     </state>
 
@@ -114,9 +118,6 @@ Claudius_angustatus__KF301358=0.000000
                 <populationModel id="ConstantPopulation.t:alignment" popSize="@popSize.t:alignment" spec="ConstantPopulation" />
                 <treeIntervals id="TreeIntervals.t:alignment" spec="TreeIntervals" tree="@Tree.t:alignment" />
             </distribution>
-            <prior id="ClockPrior.c:alignment" name="distribution" x="@clockRate.c:alignment">
-                <Uniform id="Uniform.0" lower="1.0E-9" name="distr" upper="0.001" />
-            </prior>
             <prior id="GammaShapePrior.s:alignment" name="distribution" x="@gammaShape.s:alignment">
                 <Exponential id="Exponential.0" name="distr">
                     <parameter id="RealParameter.0" lower="0.0" name="mean" upper="0.0">1.0</parameter>
@@ -146,6 +147,15 @@ Claudius_angustatus__KF301358=0.000000
                     <parameter estimate="false" id="RealParameter.12" name="beta">10.0</parameter>
                 </Gamma>
             </prior>
+            <prior id="ucldStdevPrior.c:alignment" name="distribution" x="@ucldStdev.c:alignment">
+                <Gamma id="Gamma.0" name="distr">
+                    <parameter estimate="false" id="RealParameter.01" name="alpha">0.5396</parameter>
+                    <parameter estimate="false" id="RealParameter.02" name="beta">0.3819</parameter>
+                </Gamma>
+            </prior>
+            <prior id="MeanRatePrior.c:alignment" name="distribution" x="@ucldMean.c:alignment">
+                <Uniform id="Uniform.0" name="distr" upper="Infinity" />
+            </prior>
         </distribution>
         <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
             <distribution data="@alignment" id="treeLikelihood.alignment" spec="ThreadedTreeLikelihood" tree="@Tree.t:alignment">
@@ -156,31 +166,56 @@ Claudius_angustatus__KF301358=0.000000
                         <frequencies frequencies="@freqParameter.s:alignment" id="estimatedFreqs.s:alignment" spec="Frequencies" />
                     </substModel>
                 </siteModel>
-                <branchRateModel clock.rate="@clockRate.c:alignment" id="StrictClock.c:alignment" spec="beast.evolution.branchratemodel.StrictClockModel" />
+                <branchRateModel clock.rate="@ucldMean.c:alignment" id="RelaxedClock.c:alignment" rateCategories="@rateCategories.c:alignment" spec="beast.evolution.branchratemodel.UCRelaxedClockModel" tree="@Tree.t:alignment">
+                    <LogNormal S="@ucldStdev.c:alignment" id="LogNormalDistributionModel.c:alignment" meanInRealSpace="true" name="distr">
+                        <parameter estimate="false" id="RealParameter.03" lower="0.0" name="M" upper="1.0">1.0</parameter>
+                    </LogNormal>
+                </branchRateModel>
             </distribution>
         </distribution>
     </distribution>
 
-    <operator id="StrictClockRateScaler.c:alignment" parameter="@clockRate.c:alignment" scaleFactor="0.75" spec="ScaleOperator" weight="3.0" />
+    <operator id="RateAGScaler.s:alignment" parameter="@rateAG.s:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="0.1" />
 
-    <operator id="strictClockUpDownOperator.c:alignment" scaleFactor="0.75" spec="UpDownOperator" weight="3.0">
-        <up idref="clockRate.c:alignment" />
+    <operator id="RateCGScaler.s:alignment" parameter="@rateCG.s:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="0.1" />
+
+    <operator id="RateGTScaler.s:alignment" parameter="@rateGT.s:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="0.1" />
+
+    <operator id="CoalescentConstantTreeScaler.t:alignment" scaleFactor="0.5" spec="ScaleOperator" tree="@Tree.t:alignment" weight="3.0" />
+
+    <operator id="CoalescentConstantTreeRootScaler.t:alignment" rootOnly="true" scaleFactor="0.5" spec="ScaleOperator" tree="@Tree.t:alignment" weight="3.0" />
+
+    <operator id="CoalescentConstantUniformOperator.t:alignment" spec="Uniform" tree="@Tree.t:alignment" weight="30.0" />
+
+    <operator id="CoalescentConstantSubtreeSlide.t:alignment" spec="SubtreeSlide" tree="@Tree.t:alignment" weight="15.0" />
+
+    <operator id="CoalescentConstantNarrow.t:alignment" spec="Exchange" tree="@Tree.t:alignment" weight="15.0" />
+
+    <operator id="CoalescentConstantWide.t:alignment" isNarrow="false" spec="Exchange" tree="@Tree.t:alignment" weight="3.0" />
+
+    <operator id="CoalescentConstantWilsonBalding.t:alignment" spec="WilsonBalding" tree="@Tree.t:alignment" weight="3.0" />
+
+    <operator id="PopSizeScaler.t:alignment" parameter="@popSize.t:alignment" scaleFactor="0.75" spec="ScaleOperator" weight="3.0" />
+
+    <operator id="proportionInvariantScaler.s:alignment" parameter="@proportionInvariant.s:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="0.1" />
+
+    <operator id="gammaShapeScaler.s:alignment" parameter="@gammaShape.s:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="0.1" />
+
+    <operator id="ucldMeanScaler.c:alignment" parameter="@ucldMean.c:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="1.0" />
+
+    <operator id="ucldStdevScaler.c:alignment" parameter="@ucldStdev.c:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="3.0" />
+
+    <operator id="CategoriesRandomWalk.c:alignment" parameter="@rateCategories.c:alignment" spec="IntRandomWalkOperator" weight="10.0" windowSize="1" />
+
+    <operator id="CategoriesSwapOperator.c:alignment" intparameter="@rateCategories.c:alignment" spec="SwapOperator" weight="10.0" />
+
+    <operator id="CategoriesUniform.c:alignment" parameter="@rateCategories.c:alignment" spec="UniformOperator" weight="10.0" />
+
+    <operator id="relaxedUpDownOperator.c:alignment" scaleFactor="0.75" spec="UpDownOperator" weight="3.0">
+        <up idref="ucldMean.c:alignment" />
         <down idref="Tree.t:alignment" />
     </operator>
 
-    <operator id="RateAGScaler.s:alignment" parameter="@rateAG.s:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="0.1" />
-    <operator id="RateCGScaler.s:alignment" parameter="@rateCG.s:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="0.1" />
-    <operator id="RateGTScaler.s:alignment" parameter="@rateGT.s:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="0.1" />
-    <operator id="CoalescentConstantTreeScaler.t:alignment" scaleFactor="0.5" spec="ScaleOperator" tree="@Tree.t:alignment" weight="3.0" />
-    <operator id="CoalescentConstantTreeRootScaler.t:alignment" rootOnly="true" scaleFactor="0.5" spec="ScaleOperator" tree="@Tree.t:alignment" weight="3.0" />
-    <operator id="CoalescentConstantUniformOperator.t:alignment" spec="Uniform" tree="@Tree.t:alignment" weight="30.0" />
-    <operator id="CoalescentConstantSubtreeSlide.t:alignment" spec="SubtreeSlide" tree="@Tree.t:alignment" weight="15.0" />
-    <operator id="CoalescentConstantNarrow.t:alignment" spec="Exchange" tree="@Tree.t:alignment" weight="15.0" />
-    <operator id="CoalescentConstantWide.t:alignment" isNarrow="false" spec="Exchange" tree="@Tree.t:alignment" weight="3.0" />
-    <operator id="CoalescentConstantWilsonBalding.t:alignment" spec="WilsonBalding" tree="@Tree.t:alignment" weight="3.0" />
-    <operator id="PopSizeScaler.t:alignment" parameter="@popSize.t:alignment" scaleFactor="0.75" spec="ScaleOperator" weight="3.0" />
-    <operator id="proportionInvariantScaler.s:alignment" parameter="@proportionInvariant.s:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="0.1" />
-    <operator id="gammaShapeScaler.s:alignment" parameter="@gammaShape.s:alignment" scaleFactor="0.5" spec="ScaleOperator" weight="0.1" />
     <operator delta="0.01" id="FrequenciesExchanger.s:alignment" spec="DeltaExchangeOperator" weight="0.1">
         <parameter idref="freqParameter.s:alignment" />
     </operator>
@@ -191,7 +226,6 @@ Claudius_angustatus__KF301358=0.000000
         <log idref="prior" />
         <log idref="treeLikelihood.alignment" />
         <log id="TreeHeight.t:alignment" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree.t:alignment" />
-        <log idref="clockRate.c:alignment" />
         <log idref="rateAG.s:alignment" />
         <log idref="rateCG.s:alignment" />
         <log idref="rateGT.s:alignment" />
@@ -199,6 +233,9 @@ Claudius_angustatus__KF301358=0.000000
         <log idref="CoalescentConstant.t:alignment" />
         <log idref="proportionInvariant.s:alignment" />
         <log idref="gammaShape.s:alignment" />
+        <log idref="ucldMean.c:alignment" />
+        <log idref="ucldStdev.c:alignment" />
+        <log branchratemodel="@RelaxedClock.c:alignment" id="rate.c:alignment" spec="beast.evolution.branchratemodel.RateStatistic" tree="@Tree.t:alignment" />
         <log idref="freqParameter.s:alignment" />
     </logger>
 
@@ -210,8 +247,9 @@ Claudius_angustatus__KF301358=0.000000
     </logger>
 
     <logger fileName="beast-output.trees" id="treelog.t:alignment" logEvery="2000" mode="tree">
-        <log id="TreeWithMetaDataLogger.t:alignment" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:alignment" />
+        <log branchratemodel="@RelaxedClock.c:alignment" id="TreeWithMetaDataLogger.t:alignment" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:alignment" />
     </logger>
 
 </run>
+
 </beast>
